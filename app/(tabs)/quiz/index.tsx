@@ -16,7 +16,7 @@ const DIFFICULTY_ORDER: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 export default function QuizListScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { bestScores } = useQuizProgress();
+  const { bestScores, attempts } = useQuizProgress();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -38,6 +38,7 @@ export default function QuizListScreen() {
                   difficulty={quiz.difficulty}
                   questionCount={quiz.questions.length}
                   bestScore={bestScores[quiz.id]}
+                  attemptCount={attempts[quiz.id]?.length}
                   onPress={() => router.push({ pathname: '/quiz/[quizId]', params: { quizId: quiz.id } })}
                 />
               ))}

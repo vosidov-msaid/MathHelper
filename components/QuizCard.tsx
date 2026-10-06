@@ -15,6 +15,7 @@ type Props = {
   difficulty: Difficulty;
   questionCount: number;
   bestScore?: { score: number; total: number };
+  attemptCount?: number;
   onPress: () => void;
 };
 
@@ -24,7 +25,16 @@ const getDifficultyColor = (colors: ColorScheme): Record<Difficulty, string> => 
   Hard: colors.danger,
 });
 
-export function QuizCard({ icon, title, subject, difficulty, questionCount, bestScore, onPress }: Props) {
+export function QuizCard({
+  icon,
+  title,
+  subject,
+  difficulty,
+  questionCount,
+  bestScore,
+  attemptCount,
+  onPress,
+}: Props) {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const DIFFICULTY_COLOR = getDifficultyColor(colors);
@@ -42,6 +52,7 @@ export function QuizCard({ icon, title, subject, difficulty, questionCount, best
         {bestScore ? (
           <Text style={styles.bestScore}>
             Best: {bestScore.score}/{bestScore.total}
+            {attemptCount ? ` · ${attemptCount} attempt${attemptCount === 1 ? '' : 's'}` : ''}
           </Text>
         ) : null}
       </View>

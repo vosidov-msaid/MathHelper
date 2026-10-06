@@ -7,7 +7,7 @@ A mobile app (Expo SDK 54 / React Native) that scans a photo of a math problem, 
 - **Dashboard** — take or upload a photo of a math problem; it's sent to an AI model that transcribes, solves, and explains it step by step. Save any result for later. If the scan fails because the device is offline, it's queued and retried automatically once you reconnect (a "Pending Scans" list on the Dashboard shows progress; a true API-level failure instead shows an error with a manual Retry button).
 - **Saved** — a compact list of everything you've saved; tap one to see the full image, answer, and breakdown, with a Remove action.
 - **Learn** — a course catalog (Elementary → Middle School → High School → College, 17 courses / 68 lessons) with real explanations, key points, and worked examples. Mark lessons "Reviewed" to track real progress.
-- **Quiz** — 12 short quizzes across Easy/Medium/Hard difficulty. Finishing one shows your score and a full per-question review (correct answer highlighted, your pick marked if wrong, with an explanation). Best score per quiz is remembered.
+- **Quiz** — 12 short quizzes across Easy/Medium/Hard difficulty. Finishing one shows your score, an Attempt History trend (last 20 attempts, after the first retake) and a full per-question review (correct answer highlighted, your pick marked if wrong, with an explanation). Best score per quiz is remembered.
 - **Settings** — Dark Mode (a real theme switch, not just a stored preference), Push Notifications / Daily Reminder (schedules a real local reminder), Sound Effects (plays a confirmation chime on save / mark-reviewed / quiz-complete), plus Help & Support and Privacy Policy screens.
 
 There is no backend and no user accounts. Everything you save lives only on your device (via `AsyncStorage`); the only thing that ever leaves the device is the photo sent to OpenRouter for analysis.
@@ -106,6 +106,7 @@ No data is ever sent to a server except the photo sent to OpenRouter for solving
 | `math-homework-helper/saved-problems` | Saved problems: image (base64 data URI), question, subject, answer, steps, timestamp |
 | `math-homework-helper/reviewed-lessons` | Set of lesson IDs marked "Reviewed" in Learn |
 | `math-homework-helper/quiz-best-scores` | Best score per quiz |
+| `math-homework-helper/quiz-attempts` | Last 20 attempts per quiz (score, total, timestamp), shown as an Attempt History trend on the results screen |
 | `math-homework-helper/scan-queue` | Scans that failed due to no connectivity, queued for automatic retry on reconnect |
 | `math-homework-helper/settings` | Notifications / Dark Mode / Sound Effects / Daily Reminder toggle values, plus the custom reminder hour/minute |
 

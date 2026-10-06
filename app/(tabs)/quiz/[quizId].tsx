@@ -11,12 +11,13 @@ import { useQuizProgress } from '@/contexts/QuizProgressContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { findQuiz } from '@/data/quizzes';
 import { useConfirmSound } from '@/lib/sounds';
+import { formatRelativeTime } from '@/lib/time';
 
 export default function QuizPlayScreen() {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { quizId } = useLocalSearchParams<{ quizId: string }>();
-  const { recordAttempt } = useQuizProgress();
+  const { recordAttempt, attempts } = useQuizProgress();
   const playConfirm = useConfirmSound();
   const quiz = findQuiz(quizId);
 
@@ -75,6 +76,28 @@ export default function QuizPlayScreen() {
             </Text>
             <Text style={styles.scorePct}>{pct}% correct</Text>
           </View>
+
+          {attempts[quiz.id] && attempts[quiz.id].length > 1 ? (
+            <>
+              <Text style={styles.sectionLabel}>Attempt History</Text>
+              <View style={[styles.historyCard, cardShadow]}>
+                {attempts[quiz.id].map((attempt, index) => {
+                  const attemptPct = Math.round((attempt.score / attempt.total) * 100);
+                  return (
+                    <View key={index} style={styles.historyRow}>
+                      <Text style={styles.historyDate}>{formatRelativeTime(attempt.takenAt)}</Text>
+                      <View style={styles.historyBarTrack}>
+                        <View style={[styles.historyBarFill, { width: `${attemptPct}%` }]} />
+                      </View>
+                      <Text style={styles.historyScore}>
+                        {attempt.score}/{attempt.total}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          ) : null}
 
           <Text style={styles.sectionLabel}>Review Answers</Text>
           {quiz.questions.map((question, qIndex) => {
@@ -268,6 +291,42 @@ const createStyles = (colors: ColorScheme) =>
       fontWeight: '600',
       color: colors.textPrimary,
       marginBottom: Spacing.sm,
+    },
+    historyCard: {
+      backgroundColor: colors.surface,
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      marginBottom: Spacing.lg,
+      gap: Spacing.sm,
+    },
+    historyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    historyDate: {
+      width: 64,
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
+    },
+    historyBarTrack: {
+      flex: 1,
+      height: 6,
+      borderRadius: Radius.full,
+      backgroundColor: colors.border,
+      overflow: 'hidden',
+    },
+    historyBarFill: {
+      height: '100%',
+      borderRadius: Radius.full,
+      backgroundColor: colors.primary,
+    },
+    historyScore: {
+      width: 40,
+      textAlign: 'right',
+      fontSize: FontSize.caption,
+      fontWeight: '600',
+      color: colors.textPrimary,
     },
     reviewCard: {
       backgroundColor: colors.surface,
