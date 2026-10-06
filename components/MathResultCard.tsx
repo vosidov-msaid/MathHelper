@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { StepList } from '@/components/StepList';
 import { CardShadow, Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 
@@ -41,14 +42,7 @@ export function MathResultCard({ question, subject, answer, steps, saved, onSave
       </View>
 
       <Text style={styles.breakdownLabel}>Step-by-step breakdown</Text>
-      {steps.map((step, index) => (
-        <View key={index} style={styles.stepRow}>
-          <View style={styles.stepNumber}>
-            <Text style={styles.stepNumberText}>{index + 1}</Text>
-          </View>
-          <Text style={styles.stepText}>{step}</Text>
-        </View>
-      ))}
+      <StepList steps={steps} />
     </View>
   );
 }
@@ -117,29 +111,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
     marginTop: Spacing.xs,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  stepNumber: {
-    width: 20,
-    height: 20,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  stepNumberText: {
-    fontSize: FontSize.caption,
-    color: Colors.surface,
-    fontWeight: '700',
-  },
-  stepText: {
-    flex: 1,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-    lineHeight: 20,
   },
 });

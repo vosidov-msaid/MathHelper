@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { CardShadow, Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
@@ -11,11 +11,12 @@ type Props = {
   description: string;
   progressPct: number;
   lessonCount: number;
+  onPress?: () => void;
 };
 
-export function TopicCard({ icon, title, description, progressPct, lessonCount }: Props) {
+export function TopicCard({ icon, title, description, progressPct, lessonCount, onPress }: Props) {
   return (
-    <View style={[styles.card, CardShadow]}>
+    <Pressable style={[styles.card, CardShadow]} onPress={onPress}>
       <View style={styles.iconWrap}>
         <Ionicons name={icon} size={22} color={Colors.primary} />
       </View>
@@ -29,13 +30,15 @@ export function TopicCard({ icon, title, description, progressPct, lessonCount }
           {progressPct}% complete · {lessonCount} lessons
         </Text>
       </View>
-    </View>
+      {onPress ? <Ionicons name="chevron-forward" size={18} color={Colors.textSecondary} /> : null}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.md,
     padding: Spacing.md,
