@@ -34,9 +34,12 @@ export function SavedProblemsProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, []);
 
-  const persist = useCallback(async (next: SavedProblem[]) => {
-    setSavedProblems(next);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  const persist = useCallback((updater: (prev: SavedProblem[]) => SavedProblem[]) => {
+    setSavedProblems((prev) => {
+      const next = updater(prev);
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }, []);
 
   const addSavedProblem = useCallback(
@@ -46,16 +49,16 @@ export function SavedProblemsProvider({ children }: { children: ReactNode }) {
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         savedAt: Date.now(),
       };
-      await persist([entry, ...savedProblems]);
+      persist((prev) => [entry, ...prev]);
     },
-    [savedProblems, persist],
+    [persist],
   );
 
   const removeSavedProblem = useCallback(
     async (id: string) => {
-      await persist(savedProblems.filter((problem) => problem.id !== id));
+      persist((prev) => prev.filter((problem) => problem.id !== id));
     },
-    [savedProblems, persist],
+    [persist],
   );
 
   return (
