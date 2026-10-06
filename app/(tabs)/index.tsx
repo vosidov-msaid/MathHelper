@@ -3,6 +3,7 @@ import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PhotoUploadCard } from '@/components/PhotoUploadCard';
 import { ProblemListItem } from '@/components/ProblemListItem';
 import { SectionHeader } from '@/components/SectionHeader';
 import { StatCard } from '@/components/StatCard';
@@ -21,6 +22,8 @@ export default function DashboardScreen() {
             <StatCard key={stat.id} icon={stat.icon} value={stat.value} label={stat.label} />
           ))}
         </View>
+
+        <PhotoUploadCard />
 
         <Text style={styles.sectionLabel}>Quick Actions</Text>
         <View style={styles.actionsRow}>

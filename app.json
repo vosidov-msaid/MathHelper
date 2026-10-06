@@ -38,6 +38,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Math Homework Helper to access your photos to upload a problem.",
+          "cameraPermission": "Allow Math Homework Helper to access your camera to take a photo of a problem."
+        }
       ]
     ],
     "experiments": {
