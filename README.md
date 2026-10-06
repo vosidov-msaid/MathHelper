@@ -93,6 +93,7 @@ Routes that take a dynamic segment (`[courseId]`, `[lessonId]`, `[quizId]`, `[pr
 | `expo-audio` | Sound effect playback |
 | `expo-notifications` | Daily reminder local notification |
 | `expo-asset` | Required peer dependency of `expo-audio` |
+| `@react-native-community/datetimepicker` | Native time picker for setting a custom Daily Reminder time |
 
 Other notable settings: `scheme: mathhomeworkhelper` (deep-link scheme), `experiments.typedRoutes: true` (Expo Router generates typed route params), `experiments.reactCompiler: true`.
 
@@ -105,7 +106,7 @@ No data is ever sent to a server except the photo sent to OpenRouter for solving
 | `math-homework-helper/saved-problems` | Saved problems: image (base64 data URI), question, subject, answer, steps, timestamp |
 | `math-homework-helper/reviewed-lessons` | Set of lesson IDs marked "Reviewed" in Learn |
 | `math-homework-helper/quiz-best-scores` | Best score per quiz |
-| `math-homework-helper/settings` | Notifications / Dark Mode / Sound Effects / Daily Reminder toggle values |
+| `math-homework-helper/settings` | Notifications / Dark Mode / Sound Effects / Daily Reminder toggle values, plus the custom reminder hour/minute |
 
 ## Known limitations
 

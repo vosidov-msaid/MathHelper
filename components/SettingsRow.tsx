@@ -16,6 +16,7 @@ type Props =
   | {
       type: 'chevron';
       label: string;
+      value?: string;
       onPress?: () => void;
     };
 
@@ -39,7 +40,10 @@ export function SettingsRow(props: Props) {
   return (
     <Pressable style={styles.row} onPress={props.onPress}>
       <Text style={styles.label}>{props.label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      <View style={styles.trailing}>
+        {props.value ? <Text style={styles.value}>{props.value}</Text> : null}
+        <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+      </View>
     </Pressable>
   );
 }
@@ -57,5 +61,14 @@ const createStyles = (colors: ColorScheme) =>
     label: {
       fontSize: FontSize.body,
       color: colors.textPrimary,
+    },
+    trailing: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    value: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
     },
   });

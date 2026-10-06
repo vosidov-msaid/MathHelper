@@ -1,6 +1,7 @@
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SectionHeader } from '@/components/SectionHeader';
@@ -12,10 +13,17 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { appVersion, navRows, toggleRows } from '@/data/settings';
 import { cancelDailyReminder, requestNotificationPermission, scheduleDailyReminder } from '@/lib/notifications';
 
+const formatReminderTime = (hour: number, minute: number) => {
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
+};
+
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { settings, setSetting } = useSettings();
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const handleToggle = async (id: (typeof toggleRows)[number]['id'], value: boolean) => {
     if (id === 'notifications') {
@@ -38,7 +46,7 @@ export default function SettingsScreen() {
 
     if (id === 'dailyReminder') {
       if (value) {
-        const scheduled = await scheduleDailyReminder();
+        const scheduled = await scheduleDailyReminder(settings.reminderHour, settings.reminderMinute);
         if (!scheduled) {
           Alert.alert('Permission needed', 'Enable notifications to turn on Daily Reminder.');
           return;
@@ -55,6 +63,25 @@ export default function SettingsScreen() {
     setSetting(id, value);
   };
 
+  const handleTimeChange = async (event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowTimePicker(false);
+    if (event.type === 'dismissed' || !date) return;
+
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    setSetting('reminderHour', hour);
+    setSetting('reminderMinute', minute);
+    if (settings.dailyReminder) {
+      await scheduleDailyReminder(hour, minute);
+    }
+  };
+
+  const reminderDate = useMemo(() => {
+    const date = new Date();
+    date.setHours(settings.reminderHour, settings.reminderMinute, 0, 0);
+    return date;
+  }, [settings.reminderHour, settings.reminderMinute]);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -70,7 +97,29 @@ export default function SettingsScreen() {
               onValueChange={(value) => handleToggle(row.id, value)}
             />
           ))}
+          {settings.dailyReminder ? (
+            <SettingsRow
+              type="chevron"
+              label="Reminder Time"
+              value={formatReminderTime(settings.reminderHour, settings.reminderMinute)}
+              onPress={() => setShowTimePicker(true)}
+            />
+          ) : null}
         </View>
+
+        {showTimePicker ? (
+          <View style={styles.pickerWrap}>
+            <DateTimePicker
+              value={reminderDate}
+              mode="time"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleTimeChange}
+            />
+            {Platform.OS === 'ios' ? (
+              <SettingsRow type="chevron" label="Done" onPress={() => setShowTimePicker(false)} />
+            ) : null}
+          </View>
+        ) : null}
 
         <View style={styles.group}>
           {navRows.map((row) => (
@@ -103,6 +152,12 @@ const createStyles = (colors: ColorScheme) =>
       borderRadius: Radius.md,
       overflow: 'hidden',
       marginBottom: Spacing.lg,
+    },
+    pickerWrap: {
+      borderRadius: Radius.md,
+      overflow: 'hidden',
+      marginBottom: Spacing.lg,
+      backgroundColor: colors.surface,
     },
     version: {
       textAlign: 'center',

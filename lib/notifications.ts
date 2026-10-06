@@ -1,10 +1,5 @@
 import * as Notifications from 'expo-notifications';
-import { LogBox, Platform } from 'react-native';
-
-// ponytail: this app only schedules local notifications (the daily reminder),
-// never remote push — this log is expo-notifications warning about a remote-push
-// limitation in Expo Go that doesn't apply to us, so it's just noise.
-LogBox.ignoreLogs(['expo-notifications: Android Push notifications']);
+import { Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,7 +16,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return status === 'granted';
 }
 
-export async function scheduleDailyReminder(): Promise<boolean> {
+export async function scheduleDailyReminder(hour: number, minute: number): Promise<boolean> {
   if (Platform.OS === 'web') return false;
   const granted = await requestNotificationPermission();
   if (!granted) return false;
@@ -34,8 +29,8 @@ export async function scheduleDailyReminder(): Promise<boolean> {
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 18,
-      minute: 0,
+      hour,
+      minute,
     },
   });
   return true;

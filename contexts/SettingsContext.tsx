@@ -8,6 +8,8 @@ export type AppSettings = {
   darkMode: boolean;
   soundEffects: boolean;
   dailyReminder: boolean;
+  reminderHour: number;
+  reminderMinute: number;
 };
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -15,11 +17,13 @@ const DEFAULT_SETTINGS: AppSettings = {
   darkMode: false,
   soundEffects: true,
   dailyReminder: false,
+  reminderHour: 18,
+  reminderMinute: 0,
 };
 
 type SettingsContextValue = {
   settings: AppSettings;
-  setSetting: (key: keyof AppSettings, value: boolean) => void;
+  setSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -35,7 +39,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, []);
 
-  const setSetting = useCallback((key: keyof AppSettings, value: boolean) => {
+  const setSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setSettings((prev) => {
       const next = { ...prev, [key]: value };
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
