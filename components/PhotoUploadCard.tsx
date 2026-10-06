@@ -7,16 +7,18 @@ import { MathResultCard } from '@/components/MathResultCard';
 import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 import { useSavedProblems } from '@/contexts/SavedProblemsContext';
+import { useScanQueue } from '@/contexts/ScanQueueContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { analyzeMathImage, MathProblemResult, OpenRouterError } from '@/lib/openrouter';
 import { useConfirmSound } from '@/lib/sounds';
 
-type Status = 'idle' | 'loading' | 'success' | 'error';
+type Status = 'idle' | 'loading' | 'success' | 'error' | 'queued';
 
 export function PhotoUploadCard() {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { addSavedProblem } = useSavedProblems();
+  const { enqueueScan } = useScanQueue();
   const playConfirm = useConfirmSound();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -79,9 +81,15 @@ export function PhotoUploadCard() {
       setResults(problems);
       setStatus('success');
     } catch (error) {
-      const message = error instanceof OpenRouterError ? error.message : 'Something went wrong while scanning.';
-      setErrorMessage(message);
-      setStatus('error');
+      if (error instanceof OpenRouterError) {
+        setErrorMessage(error.message);
+        setStatus('error');
+        return;
+      }
+      // Not an OpenRouterError means fetch itself failed (no connectivity) —
+      // queue it for automatic retry instead of leaving a dead-end error.
+      await enqueueScan(imageBase64, mimeType, imageUri ?? `data:${mimeType};base64,${imageBase64}`);
+      setStatus('queued');
     }
   };
 
@@ -142,6 +150,19 @@ export function PhotoUploadCard() {
       {status === 'error' && errorMessage ? (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{errorMessage}</Text>
+          <Pressable style={styles.retryButton} onPress={scanProblem}>
+            <Ionicons name="refresh" size={16} color={colors.danger} />
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      {status === 'queued' ? (
+        <View style={styles.queuedBox}>
+          <Ionicons name="cloud-offline-outline" size={18} color={colors.textSecondary} />
+          <Text style={styles.queuedText}>
+            You&apos;re offline — this scan has been queued and will retry automatically when you&apos;re back online.
+          </Text>
         </View>
       ) : null}
 
@@ -248,10 +269,35 @@ const createStyles = (colors: ColorScheme) =>
       backgroundColor: '#FEE2E2',
       borderRadius: Radius.sm,
       padding: Spacing.sm,
+      gap: Spacing.xs,
     },
     errorText: {
       fontSize: FontSize.caption,
       color: colors.danger,
+    },
+    retryButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: Spacing.xs,
+    },
+    retryButtonText: {
+      fontSize: FontSize.caption,
+      fontWeight: '700',
+      color: colors.danger,
+    },
+    queuedBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: colors.background,
+      borderRadius: Radius.sm,
+      padding: Spacing.sm,
+    },
+    queuedText: {
+      flex: 1,
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
     },
     emptyText: {
       fontSize: FontSize.caption,

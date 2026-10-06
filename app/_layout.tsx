@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LearnProgressProvider } from '@/contexts/LearnProgressContext';
 import { QuizProgressProvider } from '@/contexts/QuizProgressContext';
 import { SavedProblemsProvider } from '@/contexts/SavedProblemsContext';
+import { ScanQueueProvider } from '@/contexts/ScanQueueContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import '@/lib/notifications';
@@ -26,15 +27,17 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SavedProblemsProvider>
-      <LearnProgressProvider>
-        <QuizProgressProvider>
-          <SettingsProvider>
-            <ThemeProvider>
-              <RootNavigator />
-            </ThemeProvider>
-          </SettingsProvider>
-        </QuizProgressProvider>
-      </LearnProgressProvider>
+      <ScanQueueProvider>
+        <LearnProgressProvider>
+          <QuizProgressProvider>
+            <SettingsProvider>
+              <ThemeProvider>
+                <RootNavigator />
+              </ThemeProvider>
+            </SettingsProvider>
+          </QuizProgressProvider>
+        </LearnProgressProvider>
+      </ScanQueueProvider>
     </SavedProblemsProvider>
   );
 }

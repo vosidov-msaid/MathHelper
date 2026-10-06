@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhotoUploadCard } from '@/components/PhotoUploadCard';
 import { ProblemListItem } from '@/components/ProblemListItem';
+import { ScanQueueBanner } from '@/components/ScanQueueBanner';
 import { SectionHeader } from '@/components/SectionHeader';
 import { StatCard } from '@/components/StatCard';
 import type { ColorScheme } from '@/constants/colors';
@@ -50,6 +51,8 @@ export default function DashboardScreen() {
         </View>
 
         <PhotoUploadCard />
+
+        <ScanQueueBanner />
 
         <Text style={styles.sectionLabel}>Recent Problems</Text>
         {recentProblems.length === 0 ? (
