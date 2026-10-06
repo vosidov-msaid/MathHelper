@@ -1,15 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackHeader } from '@/components/BackHeader';
-import { CardShadow, Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 import { useLearnProgress } from '@/contexts/LearnProgressContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { findCourse } from '@/data/courses';
 
 export default function CourseDetailScreen() {
+  const { colors, cardShadow } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const { reviewedLessonIds } = useLearnProgress();
   const course = findCourse(courseId);
@@ -40,7 +44,7 @@ export default function CourseDetailScreen() {
           return (
             <Pressable
               key={lesson.id}
-              style={[styles.lessonCard, CardShadow]}
+              style={[styles.lessonCard, cardShadow]}
               onPress={() => router.push({ pathname: '/learn/lesson/[lessonId]', params: { lessonId: lesson.id } })}>
               <View style={styles.lessonNumber}>
                 <Text style={styles.lessonNumberText}>{index + 1}</Text>
@@ -52,7 +56,7 @@ export default function CourseDetailScreen() {
               <Ionicons
                 name={reviewed ? 'checkmark-circle' : 'chevron-forward'}
                 size={reviewed ? 22 : 18}
-                color={reviewed ? Colors.accent : Colors.textSecondary}
+                color={reviewed ? colors.accent : colors.textSecondary}
               />
             </Pressable>
           );
@@ -62,53 +66,54 @@ export default function CourseDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xl * 2,
-  },
-  progressLabel: {
-    fontSize: FontSize.body,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.md,
-  },
-  lessonCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    gap: Spacing.md,
-  },
-  lessonNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lessonNumberText: {
-    fontSize: FontSize.caption,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  lessonBody: {
-    flex: 1,
-    gap: 2,
-  },
-  lessonTitle: {
-    fontSize: FontSize.cardTitle,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  lessonSummary: {
-    fontSize: FontSize.caption,
-    color: Colors.textSecondary,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: Spacing.lg,
+      paddingBottom: Spacing.xl * 2,
+    },
+    progressLabel: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+      marginBottom: Spacing.md,
+    },
+    lessonCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      marginBottom: Spacing.sm,
+      gap: Spacing.md,
+    },
+    lessonNumber: {
+      width: 28,
+      height: 28,
+      borderRadius: Radius.full,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    lessonNumberText: {
+      fontSize: FontSize.caption,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    lessonBody: {
+      flex: 1,
+      gap: 2,
+    },
+    lessonTitle: {
+      fontSize: FontSize.cardTitle,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    lessonSummary: {
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
+    },
+  });

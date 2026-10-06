@@ -7,9 +7,10 @@ import { PhotoUploadCard } from '@/components/PhotoUploadCard';
 import { ProblemListItem } from '@/components/ProblemListItem';
 import { SectionHeader } from '@/components/SectionHeader';
 import { StatCard } from '@/components/StatCard';
-import { Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Spacing } from '@/constants/layout';
 import { useSavedProblems } from '@/contexts/SavedProblemsContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { formatRelativeTime } from '@/lib/time';
 
 function getGreeting() {
@@ -20,6 +21,8 @@ function getGreeting() {
 }
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { savedProblems } = useSavedProblems();
 
   const stats = useMemo(() => {
@@ -70,28 +73,29 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xl * 2,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-  },
-  sectionLabel: {
-    fontSize: FontSize.sectionHeader,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
-  },
-  emptyText: {
-    fontSize: FontSize.body,
-    color: Colors.textSecondary,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: Spacing.lg,
+      paddingBottom: Spacing.xl * 2,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginBottom: Spacing.lg,
+    },
+    sectionLabel: {
+      fontSize: FontSize.sectionHeader,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: Spacing.sm,
+    },
+    emptyText: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+  });

@@ -5,12 +5,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProblemListItem } from '@/components/ProblemListItem';
 import { SectionHeader } from '@/components/SectionHeader';
-import { Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 import { useSavedProblems } from '@/contexts/SavedProblemsContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { formatRelativeTime } from '@/lib/time';
 
 export default function SavedScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { savedProblems } = useSavedProblems();
   const [activeFilter, setActiveFilter] = useState('All');
 
@@ -66,41 +69,42 @@ export default function SavedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xl * 2,
-  },
-  emptyText: {
-    fontSize: FontSize.body,
-    color: Colors.textSecondary,
-  },
-  filterRow: {
-    marginBottom: Spacing.lg,
-  },
-  chip: {
-    borderRadius: Radius.full,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: Spacing.sm,
-  },
-  chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  chipText: {
-    fontSize: FontSize.body,
-    color: Colors.textSecondary,
-    fontWeight: '600',
-  },
-  chipTextActive: {
-    color: Colors.surface,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: Spacing.lg,
+      paddingBottom: Spacing.xl * 2,
+    },
+    emptyText: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+    },
+    filterRow: {
+      marginBottom: Spacing.lg,
+    },
+    chip: {
+      borderRadius: Radius.full,
+      paddingVertical: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginRight: Spacing.sm,
+    },
+    chipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    chipText: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
+    chipTextActive: {
+      color: colors.surface,
+    },
+  });

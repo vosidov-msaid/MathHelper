@@ -1,31 +1,24 @@
-export const profile = {
-  name: 'Alex Johnson',
-  email: 'alex@example.com',
-  initials: 'AJ',
-};
-
 export type ToggleRow = {
-  id: string;
+  id: 'notifications' | 'darkMode' | 'soundEffects' | 'dailyReminder';
   label: string;
-  defaultValue: boolean;
 };
 
 export const toggleRows: ToggleRow[] = [
-  { id: 'notifications', label: 'Push Notifications', defaultValue: true },
-  { id: 'darkMode', label: 'Dark Mode', defaultValue: false },
-  { id: 'sound', label: 'Sound Effects', defaultValue: true },
-  { id: 'reminder', label: 'Daily Reminder', defaultValue: false },
+  { id: 'notifications', label: 'Push Notifications' },
+  { id: 'darkMode', label: 'Dark Mode' },
+  { id: 'soundEffects', label: 'Sound Effects' },
+  { id: 'dailyReminder', label: 'Daily Reminder' },
 ];
 
 export type NavRow = {
   id: string;
   label: string;
+  route: '/settings/help' | '/settings/privacy';
 };
 
 export const navRows: NavRow[] = [
-  { id: 'account', label: 'Account' },
-  { id: 'help', label: 'Help & Support' },
-  { id: 'privacy', label: 'Privacy Policy' },
+  { id: 'help', label: 'Help & Support', route: '/settings/help' },
+  { id: 'privacy', label: 'Privacy Policy', route: '/settings/privacy' },
 ];
 
 export const appVersion = '1.0.0';

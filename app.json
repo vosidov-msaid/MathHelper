@@ -45,7 +45,10 @@
           "photosPermission": "Allow Math Homework Helper to access your photos to upload a problem.",
           "cameraPermission": "Allow Math Homework Helper to access your camera to take a photo of a problem."
         }
-      ]
+      ],
+      "expo-audio",
+      "expo-notifications",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

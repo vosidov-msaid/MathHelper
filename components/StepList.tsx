@@ -1,13 +1,18 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type Props = {
   steps: string[];
 };
 
 export function StepList({ steps }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <>
       {steps.map((step, index) => (
@@ -22,30 +27,31 @@ export function StepList({ steps }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  stepRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xs,
-  },
-  stepNumber: {
-    width: 20,
-    height: 20,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 1,
-  },
-  stepNumberText: {
-    fontSize: FontSize.caption,
-    color: Colors.surface,
-    fontWeight: '700',
-  },
-  stepText: {
-    flex: 1,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-    lineHeight: 20,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    stepRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginBottom: Spacing.xs,
+    },
+    stepNumber: {
+      width: 20,
+      height: 20,
+      borderRadius: Radius.full,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 1,
+    },
+    stepNumberText: {
+      fontSize: FontSize.caption,
+      color: colors.surface,
+      fontWeight: '700',
+    },
+    stepText: {
+      flex: 1,
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+      lineHeight: 20,
+    },
+  });

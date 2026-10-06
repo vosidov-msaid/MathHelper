@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Spacing } from '@/constants/layout';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type Props = {
   title: string;
@@ -9,6 +11,9 @@ type Props = {
 };
 
 export function SectionHeader({ title, subtitle }: Props) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -17,18 +22,19 @@ export function SectionHeader({ title, subtitle }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: Spacing.lg,
-  },
-  title: {
-    fontSize: FontSize.screenTitle,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  subtitle: {
-    fontSize: FontSize.body,
-    color: Colors.textSecondary,
-    marginTop: Spacing.xs,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: Spacing.lg,
+    },
+    title: {
+      fontSize: FontSize.screenTitle,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      fontSize: FontSize.body,
+      color: colors.textSecondary,
+      marginTop: Spacing.xs,
+    },
+  });

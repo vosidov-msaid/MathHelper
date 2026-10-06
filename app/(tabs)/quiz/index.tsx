@@ -1,17 +1,21 @@
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { QuizCard } from '@/components/QuizCard';
 import { SectionHeader } from '@/components/SectionHeader';
-import { Colors } from '@/constants/colors';
+import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Spacing } from '@/constants/layout';
 import { useQuizProgress } from '@/contexts/QuizProgressContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Difficulty, quizzes } from '@/data/quizzes';
 
 const DIFFICULTY_ORDER: Difficulty[] = ['Easy', 'Medium', 'Hard'];
 
 export default function QuizListScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { bestScores } = useQuizProgress();
 
   return (
@@ -45,20 +49,21 @@ export default function QuizListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xl * 2,
-  },
-  groupLabel: {
-    fontSize: FontSize.sectionHeader,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.sm,
-  },
-});
+const createStyles = (colors: ColorScheme) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: Spacing.lg,
+      paddingBottom: Spacing.xl * 2,
+    },
+    groupLabel: {
+      fontSize: FontSize.sectionHeader,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: Spacing.sm,
+      marginTop: Spacing.sm,
+    },
+  });
