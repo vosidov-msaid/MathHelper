@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackHeader } from '@/components/BackHeader';
@@ -30,8 +30,17 @@ export default function SavedProblemDetailScreen() {
   }
 
   const handleRemove = () => {
-    removeSavedProblem(problem.id);
-    router.back();
+    Alert.alert('Remove this problem?', 'This will delete it from Saved. This can\'t be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          removeSavedProblem(problem.id);
+          router.back();
+        },
+      },
+    ]);
   };
 
   return (
