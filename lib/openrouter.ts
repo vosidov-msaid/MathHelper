@@ -29,7 +29,9 @@ export type MathProblemResult = {
 
 export class OpenRouterError extends Error {}
 
-export async function analyzeMathImage(base64: string, mimeType: string): Promise<MathProblemResult[]> {
+type ChatMessage = { role: 'system' | 'user'; content: string | unknown[] };
+
+async function callOpenRouter(messages: ChatMessage[]): Promise<MathProblemResult[]> {
   if (!OPENROUTER_API_KEY) {
     throw new OpenRouterError('Missing OpenRouter API key. Set EXPO_PUBLIC_OPENROUTER_API_KEY in .env.');
   }
@@ -43,16 +45,7 @@ export async function analyzeMathImage(base64: string, mimeType: string): Promis
     body: JSON.stringify({
       model: MODEL,
       response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: 'Solve the math problem(s) in this photo.' },
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
-          ],
-        },
-      ],
+      messages,
     }),
   });
 
@@ -75,4 +68,32 @@ export async function analyzeMathImage(base64: string, mimeType: string): Promis
   }
 
   return parsed.problems ?? [];
+}
+
+export async function analyzeMathImage(
+  base64: string,
+  mimeType: string,
+  note?: string,
+): Promise<MathProblemResult[]> {
+  const prompt = note
+    ? `Solve the math problem(s) in this photo. The student added this context: ${note}`
+    : 'Solve the math problem(s) in this photo.';
+
+  return callOpenRouter([
+    { role: 'system', content: SYSTEM_PROMPT },
+    {
+      role: 'user',
+      content: [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+      ],
+    },
+  ]);
+}
+
+export async function analyzeMathText(problemText: string): Promise<MathProblemResult[]> {
+  return callOpenRouter([
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: `Solve the math problem(s) below.\n\n${problemText}` },
+  ]);
 }

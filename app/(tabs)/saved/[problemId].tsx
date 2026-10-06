@@ -20,7 +20,7 @@ const buildSolutionText = (problem: SavedProblem) => {
 };
 
 const writeShareableImage = (problem: SavedProblem) => {
-  const match = problem.imageUri.match(/^data:([^;]+);base64,(.+)$/);
+  const match = problem.imageUri?.match(/^data:([^;]+);base64,(.+)$/);
   if (!match) return null;
   const [, mimeType, base64] = match;
   const extension = mimeType.split('/')[1] ?? 'jpg';
@@ -85,7 +85,14 @@ export default function SavedProblemDetailScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <BackHeader title="Saved Problem" subtitle={`Saved ${formatRelativeTime(problem.savedAt)}`} />
 
-        <Image source={{ uri: problem.imageUri }} style={styles.image} resizeMode="contain" />
+        {problem.imageUri ? (
+          <Image source={{ uri: problem.imageUri }} style={styles.image} resizeMode="contain" />
+        ) : (
+          <View style={styles.typedBadge}>
+            <Ionicons name="create-outline" size={16} color={colors.primary} />
+            <Text style={styles.typedBadgeText}>Typed problem — no photo</Text>
+          </View>
+        )}
 
         <MathResultCard
           question={problem.question}
@@ -99,10 +106,12 @@ export default function SavedProblemDetailScreen() {
             <Ionicons name="document-text-outline" size={18} color={colors.primary} />
             <Text style={styles.shareButtonText}>Share Solution</Text>
           </Pressable>
-          <Pressable style={styles.shareButton} onPress={handleShareImage}>
-            <Ionicons name="image-outline" size={18} color={colors.primary} />
-            <Text style={styles.shareButtonText}>Share Image</Text>
-          </Pressable>
+          {problem.imageUri ? (
+            <Pressable style={styles.shareButton} onPress={handleShareImage}>
+              <Ionicons name="image-outline" size={18} color={colors.primary} />
+              <Text style={styles.shareButtonText}>Share Image</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <Pressable style={styles.removeButton} onPress={handleRemove}>
@@ -130,6 +139,20 @@ const createStyles = (colors: ColorScheme) =>
       borderRadius: Radius.md,
       backgroundColor: colors.surface,
       marginBottom: Spacing.lg,
+    },
+    typedBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: colors.surface,
+      borderRadius: Radius.md,
+      padding: Spacing.sm,
+      marginBottom: Spacing.lg,
+      alignSelf: 'flex-start',
+    },
+    typedBadgeText: {
+      fontSize: FontSize.caption,
+      color: colors.textSecondary,
     },
     shareRow: {
       flexDirection: 'row',

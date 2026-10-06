@@ -56,8 +56,19 @@ export function ScanQueueBanner() {
               onPress={() => {
                 if (scan.status === 'solved') setExpandedId(isExpanded ? null : scan.id);
               }}>
-              <Image source={{ uri: scan.imageUri }} style={styles.thumbnail} />
+              {scan.kind === 'photo' ? (
+                <Image source={{ uri: scan.imageUri }} style={styles.thumbnail} />
+              ) : (
+                <View style={styles.textThumbnail}>
+                  <Ionicons name="create-outline" size={18} color={colors.primary} />
+                </View>
+              )}
               <View style={styles.textBlock}>
+                {scan.kind === 'text' ? (
+                  <Text style={styles.problemSnippet} numberOfLines={1}>
+                    {scan.problemText}
+                  </Text>
+                ) : null}
                 <Text style={styles.statusText} numberOfLines={2}>
                   {statusLabel(scan)}
                 </Text>
@@ -123,8 +134,21 @@ const createStyles = (colors: ColorScheme) =>
       borderRadius: Radius.sm,
       backgroundColor: colors.background,
     },
+    textThumbnail: {
+      width: 40,
+      height: 40,
+      borderRadius: Radius.sm,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     textBlock: {
       flex: 1,
+    },
+    problemSnippet: {
+      fontSize: FontSize.caption,
+      fontWeight: '600',
+      color: colors.textPrimary,
     },
     statusText: {
       fontSize: FontSize.body,

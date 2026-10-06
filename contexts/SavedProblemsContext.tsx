@@ -7,7 +7,8 @@ export type SavedProblem = {
   id: string;
   // ponytail: base64 data URI kept inline in AsyncStorage for simplicity.
   // Upgrade to expo-file-system-backed storage if saved-image volume grows large.
-  imageUri: string;
+  // Undefined for problems solved from typed/handwritten text input (no photo).
+  imageUri?: string;
   question: string;
   subject: string;
   answer: string;

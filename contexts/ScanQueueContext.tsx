@@ -2,17 +2,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Network from 'expo-network';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import { analyzeMathImage, MathProblemResult, OpenRouterError } from '@/lib/openrouter';
+import { analyzeMathImage, analyzeMathText, MathProblemResult, OpenRouterError } from '@/lib/openrouter';
 
 const STORAGE_KEY = 'math-homework-helper/scan-queue';
 
 export type QueuedScan = {
   id: string;
+  kind: 'photo' | 'text';
   // ponytail: base64 data kept inline in AsyncStorage for simplicity, same tradeoff
-  // already accepted in SavedProblemsContext.
-  imageUri: string;
-  imageBase64: string;
-  mimeType: string;
+  // already accepted in SavedProblemsContext. Only set when kind === 'photo'.
+  imageUri?: string;
+  imageBase64?: string;
+  mimeType?: string;
+  note?: string;
+  // Only set when kind === 'text'.
+  problemText?: string;
   queuedAt: number;
   attempts: number;
   status: 'queued' | 'retrying' | 'solved' | 'failed';
@@ -22,7 +26,8 @@ export type QueuedScan = {
 
 type ScanQueueContextValue = {
   queuedScans: QueuedScan[];
-  enqueueScan: (imageBase64: string, mimeType: string, imageUri: string) => Promise<void>;
+  enqueuePhotoScan: (imageBase64: string, mimeType: string, imageUri: string, note?: string) => Promise<void>;
+  enqueueTextScan: (problemText: string) => Promise<void>;
   removeFromQueue: (id: string) => Promise<void>;
   retryNow: (id: string) => Promise<void>;
 };
@@ -55,13 +60,30 @@ export function ScanQueueProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const enqueueScan = useCallback(
-    async (imageBase64: string, mimeType: string, imageUri: string) => {
+  const enqueuePhotoScan = useCallback(
+    async (imageBase64: string, mimeType: string, imageUri: string, note?: string) => {
       const entry: QueuedScan = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        kind: 'photo',
         imageUri,
         imageBase64,
         mimeType,
+        note,
+        queuedAt: Date.now(),
+        attempts: 0,
+        status: 'queued',
+      };
+      persist((prev) => [entry, ...prev]);
+    },
+    [persist],
+  );
+
+  const enqueueTextScan = useCallback(
+    async (problemText: string) => {
+      const entry: QueuedScan = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        kind: 'text',
+        problemText,
         queuedAt: Date.now(),
         attempts: 0,
         status: 'queued',
@@ -82,7 +104,10 @@ export function ScanQueueProvider({ children }: { children: ReactNode }) {
     async (scan: QueuedScan) => {
       persist((prev) => prev.map((s) => (s.id === scan.id ? { ...s, status: 'retrying' } : s)));
       try {
-        const results = await analyzeMathImage(scan.imageBase64, scan.mimeType);
+        const results =
+          scan.kind === 'photo'
+            ? await analyzeMathImage(scan.imageBase64!, scan.mimeType!, scan.note)
+            : await analyzeMathText(scan.problemText!);
         persist((prev) =>
           prev.map((s) => (s.id === scan.id ? { ...s, status: 'solved', results, attempts: s.attempts + 1 } : s)),
         );
@@ -126,7 +151,8 @@ export function ScanQueueProvider({ children }: { children: ReactNode }) {
   }, [networkState.isConnected, networkState.isInternetReachable, attemptScan]);
 
   return (
-    <ScanQueueContext.Provider value={{ queuedScans, enqueueScan, removeFromQueue, retryNow }}>
+    <ScanQueueContext.Provider
+      value={{ queuedScans, enqueuePhotoScan, enqueueTextScan, removeFromQueue, retryNow }}>
       {children}
     </ScanQueueContext.Provider>
   );
