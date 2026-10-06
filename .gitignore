@@ -31,7 +31,13 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+
+# local agent/tooling state (unrelated to the app)
+.claude-flow/
+.claude/proven-config.json
+.claude/.proven-config-version
 
 # typescript
 *.tsbuildinfo

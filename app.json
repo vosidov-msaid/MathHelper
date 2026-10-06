@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "math-scaffold-tmp",
-    "slug": "math-scaffold-tmp",
+    "name": "Math Homework Helper",
+    "slug": "math-homework-helper",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mathscaffoldtmp",
+    "scheme": "mathhomeworkhelper",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
