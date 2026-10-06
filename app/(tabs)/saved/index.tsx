@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProblemListItem } from '@/components/ProblemListItem';
+import { SearchBar } from '@/components/SearchBar';
 import { SectionHeader } from '@/components/SectionHeader';
 import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
@@ -16,14 +17,16 @@ export default function SavedScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { savedProblems } = useSavedProblems();
   const [activeFilter, setActiveFilter] = useState('All');
+  const [query, setQuery] = useState('');
 
   const filters = useMemo(() => {
     const subjects = Array.from(new Set(savedProblems.map((problem) => problem.subject)));
     return ['All', ...subjects];
   }, [savedProblems]);
 
-  const filteredProblems =
-    activeFilter === 'All' ? savedProblems : savedProblems.filter((problem) => problem.subject === activeFilter);
+  const filteredProblems = savedProblems
+    .filter((problem) => activeFilter === 'All' || problem.subject === activeFilter)
+    .filter((problem) => problem.question.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -36,6 +39,8 @@ export default function SavedScreen() {
           </Text>
         ) : (
           <>
+            <SearchBar value={query} onChangeText={setQuery} placeholder="Search saved problems" />
+
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
               {filters.map((filter) => {
                 const active = filter === activeFilter;
@@ -50,18 +55,22 @@ export default function SavedScreen() {
               })}
             </ScrollView>
 
-            {filteredProblems.map((problem) => (
-              <ProblemListItem
-                key={problem.id}
-                imageUri={problem.imageUri}
-                snippet={problem.question}
-                subject={problem.subject}
-                timeAgo={formatRelativeTime(problem.savedAt)}
-                onPress={() =>
-                  router.push({ pathname: '/saved/[problemId]', params: { problemId: problem.id } })
-                }
-              />
-            ))}
+            {filteredProblems.length === 0 ? (
+              <Text style={styles.emptyText}>No saved problems match your search.</Text>
+            ) : (
+              filteredProblems.map((problem) => (
+                <ProblemListItem
+                  key={problem.id}
+                  imageUri={problem.imageUri}
+                  snippet={problem.question}
+                  subject={problem.subject}
+                  timeAgo={formatRelativeTime(problem.savedAt)}
+                  onPress={() =>
+                    router.push({ pathname: '/saved/[problemId]', params: { problemId: problem.id } })
+                  }
+                />
+              ))
+            )}
           </>
         )}
       </ScrollView>
