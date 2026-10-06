@@ -1,43 +1,59 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProblemListItem } from '@/components/ProblemListItem';
+import { SavedProblemCard } from '@/components/SavedProblemCard';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
-import { filters, savedProblems } from '@/data/saved';
+import { useSavedProblems } from '@/contexts/SavedProblemsContext';
 
 export default function SavedScreen() {
-  const [activeFilter, setActiveFilter] = useState(filters[0]);
+  const { savedProblems, removeSavedProblem } = useSavedProblems();
+  const [activeFilter, setActiveFilter] = useState('All');
+
+  const filters = useMemo(() => {
+    const subjects = Array.from(new Set(savedProblems.map((problem) => problem.subject)));
+    return ['All', ...subjects];
+  }, [savedProblems]);
+
+  const filteredProblems =
+    activeFilter === 'All' ? savedProblems : savedProblems.filter((problem) => problem.subject === activeFilter);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <SectionHeader title="Saved Problems" subtitle="Your bookmarked solutions" />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-          {filters.map((filter) => {
-            const active = filter === activeFilter;
-            return (
-              <Pressable
-                key={filter}
-                style={[styles.chip, active && styles.chipActive]}
-                onPress={() => setActiveFilter(filter)}>
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{filter}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        {savedProblems.length === 0 ? (
+          <Text style={styles.emptyText}>
+            Nothing saved yet. Scan a problem on the Dashboard and tap Save to add it here.
+          </Text>
+        ) : (
+          <>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+              {filters.map((filter) => {
+                const active = filter === activeFilter;
+                return (
+                  <Pressable
+                    key={filter}
+                    style={[styles.chip, active && styles.chipActive]}
+                    onPress={() => setActiveFilter(filter)}>
+                    <Text style={[styles.chipText, active && styles.chipTextActive]}>{filter}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
 
-        {savedProblems.map((problem) => (
-          <ProblemListItem
-            key={problem.id}
-            snippet={problem.snippet}
-            subject={problem.subject}
-            timeAgo={problem.savedAgo}
-          />
-        ))}
+            {filteredProblems.map((problem) => (
+              <SavedProblemCard
+                key={problem.id}
+                problem={problem}
+                onDelete={() => removeSavedProblem(problem.id)}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -51,6 +67,10 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     paddingBottom: Spacing.xl * 2,
+  },
+  emptyText: {
+    fontSize: FontSize.body,
+    color: Colors.textSecondary,
   },
   filterRow: {
     marginBottom: Spacing.lg,

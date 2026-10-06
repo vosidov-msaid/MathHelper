@@ -6,17 +6,20 @@ import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } fr
 import { MathResultCard } from '@/components/MathResultCard';
 import { CardShadow, Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
+import { useSavedProblems } from '@/contexts/SavedProblemsContext';
 import { analyzeMathImage, MathProblemResult, OpenRouterError } from '@/lib/openrouter';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export function PhotoUploadCard() {
+  const { addSavedProblem } = useSavedProblems();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState('image/jpeg');
   const [status, setStatus] = useState<Status>('idle');
   const [results, setResults] = useState<MathProblemResult[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [savedIndices, setSavedIndices] = useState<Set<number>>(new Set());
 
   const onImagePicked = (asset: ImagePicker.ImagePickerAsset) => {
     setImageUri(asset.uri);
@@ -25,6 +28,7 @@ export function PhotoUploadCard() {
     setStatus('idle');
     setResults([]);
     setErrorMessage(null);
+    setSavedIndices(new Set());
   };
 
   const takePhoto = async () => {
@@ -57,12 +61,14 @@ export function PhotoUploadCard() {
     setStatus('idle');
     setResults([]);
     setErrorMessage(null);
+    setSavedIndices(new Set());
   };
 
   const scanProblem = async () => {
     if (!imageBase64) return;
     setStatus('loading');
     setErrorMessage(null);
+    setSavedIndices(new Set());
     try {
       const problems = await analyzeMathImage(imageBase64, mimeType);
       setResults(problems);
@@ -72,6 +78,18 @@ export function PhotoUploadCard() {
       setErrorMessage(message);
       setStatus('error');
     }
+  };
+
+  const saveProblem = async (index: number, problem: MathProblemResult) => {
+    if (!imageBase64) return;
+    await addSavedProblem({
+      imageUri: `data:${mimeType};base64,${imageBase64}`,
+      question: problem.question,
+      subject: problem.subject,
+      answer: problem.answer,
+      steps: problem.steps,
+    });
+    setSavedIndices((prev) => new Set(prev).add(index));
   };
 
   return (
@@ -133,6 +151,8 @@ export function PhotoUploadCard() {
             subject={problem.subject}
             answer={problem.answer}
             steps={problem.steps}
+            saved={savedIndices.has(index)}
+            onSave={() => saveProblem(index, problem)}
           />
         ))}
     </View>

@@ -1,21 +1,43 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhotoUploadCard } from '@/components/PhotoUploadCard';
 import { ProblemListItem } from '@/components/ProblemListItem';
 import { SectionHeader } from '@/components/SectionHeader';
 import { StatCard } from '@/components/StatCard';
-import { CardShadow, Colors } from '@/constants/colors';
-import { FontSize, Radius, Spacing } from '@/constants/layout';
-import { greetingName, quickActions, recentProblems, stats } from '@/data/dashboard';
+import { Colors } from '@/constants/colors';
+import { FontSize, Spacing } from '@/constants/layout';
+import { useSavedProblems } from '@/contexts/SavedProblemsContext';
+import { formatRelativeTime } from '@/lib/time';
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
 
 export default function DashboardScreen() {
+  const { savedProblems } = useSavedProblems();
+
+  const stats = useMemo(() => {
+    const subjectCount = new Set(savedProblems.map((problem) => problem.subject)).size;
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const savedThisWeek = savedProblems.filter((problem) => problem.savedAt >= weekAgo).length;
+    return [
+      { id: 'saved', icon: 'bookmark' as const, value: String(savedProblems.length), label: 'Saved' },
+      { id: 'subjects', icon: 'shapes' as const, value: String(subjectCount), label: 'Subjects' },
+      { id: 'week', icon: 'calendar' as const, value: String(savedThisWeek), label: 'This Week' },
+    ];
+  }, [savedProblems]);
+
+  const recentProblems = savedProblems.slice(0, 3);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <SectionHeader title={`Good afternoon, ${greetingName}`} subtitle="Let's keep the streak going" />
+        <SectionHeader title={getGreeting()} subtitle="Scan a problem to get started" />
 
         <View style={styles.statsRow}>
           {stats.map((stat) => (
@@ -25,25 +47,19 @@ export default function DashboardScreen() {
 
         <PhotoUploadCard />
 
-        <Text style={styles.sectionLabel}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          {quickActions.map((action) => (
-            <Pressable key={action.id} style={[styles.actionCard, CardShadow]}>
-              <Ionicons name={action.icon} size={22} color={Colors.primary} />
-              <Text style={styles.actionLabel}>{action.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-
         <Text style={styles.sectionLabel}>Recent Problems</Text>
-        {recentProblems.map((problem) => (
-          <ProblemListItem
-            key={problem.id}
-            snippet={problem.snippet}
-            subject={problem.subject}
-            timeAgo={problem.timeAgo}
-          />
-        ))}
+        {recentProblems.length === 0 ? (
+          <Text style={styles.emptyText}>Nothing scanned yet — your saved problems will show up here.</Text>
+        ) : (
+          recentProblems.map((problem) => (
+            <ProblemListItem
+              key={problem.id}
+              snippet={problem.question}
+              subject={problem.subject}
+              timeAgo={formatRelativeTime(problem.savedAt)}
+            />
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -69,26 +85,8 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-  },
-  actionCard: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    alignItems: 'center',
-    gap: Spacing.xs,
-    minHeight: 72,
-    justifyContent: 'center',
-  },
-  actionLabel: {
-    fontSize: FontSize.caption,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    textAlign: 'center',
+  emptyText: {
+    fontSize: FontSize.body,
+    color: Colors.textSecondary,
   },
 });
