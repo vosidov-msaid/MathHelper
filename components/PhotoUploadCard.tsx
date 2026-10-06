@@ -1,13 +1,31 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { MathResultCard } from '@/components/MathResultCard';
 import { CardShadow, Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
+import { analyzeMathImage, MathProblemResult, OpenRouterError } from '@/lib/openrouter';
+
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export function PhotoUploadCard() {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [mimeType, setMimeType] = useState('image/jpeg');
+  const [status, setStatus] = useState<Status>('idle');
+  const [results, setResults] = useState<MathProblemResult[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const onImagePicked = (asset: ImagePicker.ImagePickerAsset) => {
+    setImageUri(asset.uri);
+    setImageBase64(asset.base64 ?? null);
+    setMimeType(asset.mimeType ?? 'image/jpeg');
+    setStatus('idle');
+    setResults([]);
+    setErrorMessage(null);
+  };
 
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -15,9 +33,9 @@ export function PhotoUploadCard() {
       Alert.alert('Camera access needed', 'Enable camera access to take a photo of a problem.');
       return;
     }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.7, base64: true });
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      onImagePicked(result.assets[0]);
     }
   };
 
@@ -27,9 +45,32 @@ export function PhotoUploadCard() {
       Alert.alert('Photo access needed', 'Enable photo library access to upload a problem.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
+    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7, base64: true });
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      onImagePicked(result.assets[0]);
+    }
+  };
+
+  const clearImage = () => {
+    setImageUri(null);
+    setImageBase64(null);
+    setStatus('idle');
+    setResults([]);
+    setErrorMessage(null);
+  };
+
+  const scanProblem = async () => {
+    if (!imageBase64) return;
+    setStatus('loading');
+    setErrorMessage(null);
+    try {
+      const problems = await analyzeMathImage(imageBase64, mimeType);
+      setResults(problems);
+      setStatus('success');
+    } catch (error) {
+      const message = error instanceof OpenRouterError ? error.message : 'Something went wrong while scanning.';
+      setErrorMessage(message);
+      setStatus('error');
     }
   };
 
@@ -41,7 +82,7 @@ export function PhotoUploadCard() {
       {imageUri ? (
         <View style={styles.previewWrap}>
           <Image source={{ uri: imageUri }} style={styles.preview} />
-          <Pressable style={styles.removeButton} onPress={() => setImageUri(null)}>
+          <Pressable style={styles.removeButton} onPress={clearImage}>
             <Ionicons name="close" size={16} color={Colors.surface} />
           </Pressable>
         </View>
@@ -57,6 +98,43 @@ export function PhotoUploadCard() {
           <Text style={styles.actionLabel}>Upload Photo</Text>
         </Pressable>
       </View>
+
+      {imageUri ? (
+        <Pressable
+          style={[styles.scanButton, status === 'loading' && styles.scanButtonDisabled]}
+          onPress={scanProblem}
+          disabled={status === 'loading'}>
+          {status === 'loading' ? (
+            <ActivityIndicator color={Colors.surface} />
+          ) : (
+            <>
+              <Ionicons name="sparkles" size={18} color={Colors.surface} />
+              <Text style={styles.scanButtonText}>Scan Problem</Text>
+            </>
+          )}
+        </Pressable>
+      ) : null}
+
+      {status === 'error' && errorMessage ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
+      {status === 'success' && results.length === 0 ? (
+        <Text style={styles.emptyText}>No math problem was found in that photo. Try another one.</Text>
+      ) : null}
+
+      {status === 'success' &&
+        results.map((problem, index) => (
+          <MathResultCard
+            key={index}
+            question={problem.question}
+            subject={problem.subject}
+            answer={problem.answer}
+            steps={problem.steps}
+          />
+        ))}
     </View>
   );
 }
@@ -120,5 +198,36 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.sm,
+    paddingVertical: Spacing.sm,
+    minHeight: 44,
+  },
+  scanButtonDisabled: {
+    opacity: 0.7,
+  },
+  scanButtonText: {
+    fontSize: FontSize.body,
+    fontWeight: '700',
+    color: Colors.surface,
+  },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderRadius: Radius.sm,
+    padding: Spacing.sm,
+  },
+  errorText: {
+    fontSize: FontSize.caption,
+    color: Colors.danger,
+  },
+  emptyText: {
+    fontSize: FontSize.caption,
+    color: Colors.textSecondary,
   },
 });
