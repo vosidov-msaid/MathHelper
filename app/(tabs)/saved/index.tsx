@@ -1,15 +1,17 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SavedProblemCard } from '@/components/SavedProblemCard';
+import { ProblemListItem } from '@/components/ProblemListItem';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 import { useSavedProblems } from '@/contexts/SavedProblemsContext';
+import { formatRelativeTime } from '@/lib/time';
 
 export default function SavedScreen() {
-  const { savedProblems, removeSavedProblem } = useSavedProblems();
+  const { savedProblems } = useSavedProblems();
   const [activeFilter, setActiveFilter] = useState('All');
 
   const filters = useMemo(() => {
@@ -46,10 +48,15 @@ export default function SavedScreen() {
             </ScrollView>
 
             {filteredProblems.map((problem) => (
-              <SavedProblemCard
+              <ProblemListItem
                 key={problem.id}
-                problem={problem}
-                onDelete={() => removeSavedProblem(problem.id)}
+                imageUri={problem.imageUri}
+                snippet={problem.question}
+                subject={problem.subject}
+                timeAgo={formatRelativeTime(problem.savedAt)}
+                onPress={() =>
+                  router.push({ pathname: '/saved/[problemId]', params: { problemId: problem.id } })
+                }
               />
             ))}
           </>

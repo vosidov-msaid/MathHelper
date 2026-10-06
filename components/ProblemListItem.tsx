@@ -1,17 +1,21 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { CardShadow, Colors } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
 
 type Props = {
   snippet: string;
   subject: string;
   timeAgo: string;
+  imageUri?: string;
+  onPress?: () => void;
 };
 
-export function ProblemListItem({ snippet, subject, timeAgo }: Props) {
+export function ProblemListItem({ snippet, subject, timeAgo, imageUri, onPress }: Props) {
   return (
-    <View style={[styles.card, CardShadow]}>
+    <Pressable style={styles.card} onPress={onPress}>
+      {imageUri ? <Image source={{ uri: imageUri }} style={styles.thumbnail} /> : null}
       <View style={styles.textBlock}>
         <Text style={styles.snippet} numberOfLines={1}>
           {snippet}
@@ -21,7 +25,8 @@ export function ProblemListItem({ snippet, subject, timeAgo }: Props) {
         </View>
       </View>
       <Text style={styles.timeAgo}>{timeAgo}</Text>
-    </View>
+      {onPress ? <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} /> : null}
+    </Pressable>
   );
 }
 
@@ -29,16 +34,21 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: Colors.surface,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  thumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.background,
   },
   textBlock: {
     flex: 1,
     gap: Spacing.xs,
-    marginRight: Spacing.sm,
   },
   snippet: {
     fontSize: FontSize.cardTitle,

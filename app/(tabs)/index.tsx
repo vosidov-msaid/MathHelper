@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -54,9 +55,13 @@ export default function DashboardScreen() {
           recentProblems.map((problem) => (
             <ProblemListItem
               key={problem.id}
+              imageUri={problem.imageUri}
               snippet={problem.question}
               subject={problem.subject}
               timeAgo={formatRelativeTime(problem.savedAt)}
+              onPress={() =>
+                router.push({ pathname: '/saved/[problemId]', params: { problemId: problem.id } })
+              }
             />
           ))
         )}
