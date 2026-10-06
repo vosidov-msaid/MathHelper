@@ -5,7 +5,7 @@ A mobile app (Expo SDK 54 / React Native) that scans a photo of a math problem, 
 ## Features
 
 - **Dashboard** — take or upload a photo of a math problem; it's sent to an AI model that transcribes, solves, and explains it step by step. Save any result for later. If the scan fails because the device is offline, it's queued and retried automatically once you reconnect (a "Pending Scans" list on the Dashboard shows progress; a true API-level failure instead shows an error with a manual Retry button).
-- **Saved** — a compact list of everything you've saved; tap one to see the full image, answer, and breakdown, with a Remove action.
+- **Saved** — a compact list of everything you've saved; tap one to see the full image, answer, and breakdown, with Share Solution (text), Share Image, and Remove (with a confirmation prompt) actions.
 - **Learn** — a course catalog (Elementary → Middle School → High School → College, 17 courses / 68 lessons) with real explanations, key points, and worked examples. Mark lessons "Reviewed" to track real progress.
 - **Quiz** — 12 short quizzes across Easy/Medium/Hard difficulty. Finishing one shows your score, an Attempt History trend (last 20 attempts, after the first retake) and a full per-question review (correct answer highlighted, your pick marked if wrong, with an explanation). Best score per quiz is remembered.
 - **Settings** — Theme (Light / System / Dark — System follows the OS appearance live via `useColorScheme`), Push Notifications / Daily Reminder (schedules a real local reminder at a custom time), Sound Effects (plays a confirmation chime on save / mark-reviewed / quiz-complete), plus Help & Support and Privacy Policy screens.
@@ -17,7 +17,7 @@ There is no backend and no user accounts. Everything you save lives only on your
 - [Expo SDK 54](https://docs.expo.dev/) + [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing, TypeScript)
 - [OpenRouter](https://openrouter.ai/) chat-completions API (`deepseek/deepseek-v4.1-flash`, vision-capable) for solving scanned problems
 - `@react-native-async-storage/async-storage` for all local persistence (saved problems, learn progress, quiz scores, settings)
-- `expo-image-picker` (camera/photo library), `expo-audio` (sound effects), `expo-notifications` (daily reminder), `expo-network` (offline detection for the scan retry queue)
+- `expo-image-picker` (camera/photo library), `expo-audio` (sound effects), `expo-notifications` (daily reminder), `expo-network` (offline detection for the scan retry queue), `expo-sharing` + `expo-file-system` (sharing a saved problem's image)
 - Plain `StyleSheet` + a small `ThemeContext` for light/dark theming — no UI/styling library
 
 ## Setup
