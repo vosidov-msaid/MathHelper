@@ -1,11 +1,10 @@
 export type ToggleRow = {
-  id: 'notifications' | 'darkMode' | 'soundEffects' | 'dailyReminder';
+  id: 'notifications' | 'soundEffects' | 'dailyReminder';
   label: string;
 };
 
 export const toggleRows: ToggleRow[] = [
   { id: 'notifications', label: 'Push Notifications' },
-  { id: 'darkMode', label: 'Dark Mode' },
   { id: 'soundEffects', label: 'Sound Effects' },
   { id: 'dailyReminder', label: 'Daily Reminder' },
 ];

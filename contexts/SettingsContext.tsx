@@ -3,9 +3,11 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useState 
 
 const STORAGE_KEY = 'math-homework-helper/settings';
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+
 export type AppSettings = {
   notifications: boolean;
-  darkMode: boolean;
+  themeMode: ThemeMode;
   soundEffects: boolean;
   dailyReminder: boolean;
   reminderHour: number;
@@ -14,7 +16,7 @@ export type AppSettings = {
 
 const DEFAULT_SETTINGS: AppSettings = {
   notifications: true,
-  darkMode: false,
+  themeMode: 'system',
   soundEffects: true,
   dailyReminder: false,
   reminderHour: 18,

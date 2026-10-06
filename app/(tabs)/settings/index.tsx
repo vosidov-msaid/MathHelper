@@ -1,13 +1,16 @@
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
+import type { ComponentProps } from 'react';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SectionHeader } from '@/components/SectionHeader';
 import { SettingsRow } from '@/components/SettingsRow';
 import type { ColorScheme } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/layout';
+import type { ThemeMode } from '@/contexts/SettingsContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { appVersion, navRows, toggleRows } from '@/data/settings';
@@ -18,6 +21,12 @@ const formatReminderTime = (hour: number, minute: number) => {
   const hour12 = hour % 12 === 0 ? 12 : hour % 12;
   return `${hour12}:${minute.toString().padStart(2, '0')} ${period}`;
 };
+
+const THEME_OPTIONS: { mode: ThemeMode; icon: ComponentProps<typeof Ionicons>['name'] }[] = [
+  { mode: 'light', icon: 'sunny-outline' },
+  { mode: 'system', icon: 'contrast-outline' },
+  { mode: 'dark', icon: 'moon-outline' },
+];
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -88,6 +97,23 @@ export default function SettingsScreen() {
         <SectionHeader title="Settings" />
 
         <View style={styles.group}>
+          <View style={styles.themeRow}>
+            <Text style={styles.label}>Theme</Text>
+            <View style={styles.segmented}>
+              {THEME_OPTIONS.map((option) => {
+                const active = settings.themeMode === option.mode;
+                return (
+                  <Pressable
+                    key={option.mode}
+                    style={[styles.segmentButton, active && styles.segmentButtonActive]}
+                    onPress={() => setSetting('themeMode', option.mode)}
+                    hitSlop={4}>
+                    <Ionicons name={option.icon} size={16} color={active ? colors.surface : colors.textSecondary} />
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
           {toggleRows.map((row) => (
             <SettingsRow
               key={row.id}
@@ -152,6 +178,35 @@ const createStyles = (colors: ColorScheme) =>
       borderRadius: Radius.md,
       overflow: 'hidden',
       marginBottom: Spacing.lg,
+    },
+    themeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      paddingVertical: Spacing.md,
+      paddingHorizontal: Spacing.md,
+    },
+    label: {
+      fontSize: FontSize.body,
+      color: colors.textPrimary,
+    },
+    segmented: {
+      flexDirection: 'row',
+      backgroundColor: colors.background,
+      borderRadius: Radius.full,
+      padding: 2,
+      gap: 2,
+    },
+    segmentButton: {
+      width: 32,
+      height: 28,
+      borderRadius: Radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    segmentButtonActive: {
+      backgroundColor: colors.primary,
     },
     pickerWrap: {
       borderRadius: Radius.md,
